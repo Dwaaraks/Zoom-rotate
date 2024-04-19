@@ -216,53 +216,50 @@ export class EmployeeComponent implements OnInit {
 
 <!-- employee.component.html - Template for managing employee data in Angular -->
 <div>
-  <ul>
-    <li *ngFor="let employee of employees" (click)="onSelect(employee)">
-      {{ employee.name }}
-    </li>
-  </ul>
-  <div *ngIf="selectedEmployee.id">
+  <!-- Form for adding new employee -->
+  <form *ngIf="isNewEmployee" (ngSubmit)="saveEmployee()">
     <label>Name:</label>
     <input [(ngModel)]="selectedEmployee.name" name="name">
     <label>Department:</label>
     <input [(ngModel)]="selectedEmployee.department" name="department">
-    <button (click)="saveEmployee()">Save</button>
-    <button (click)="deleteEmployee(selectedEmployee.id)">Delete</button>
-    <button (click)="cancelEdit()">Cancel</button>
-  </div>
+    <!-- Add fields for other employee details -->
+    <button type="submit">Submit</button>
+  </form>
+
+  <!-- Form for editing existing employee -->
+  <form *ngIf="!isNewEmployee" (ngSubmit)="saveEmployee()">
+    <label>Name:</label>
+    <input [(ngModel)]="selectedEmployee.name" name="name">
+    <label>Department:</label>
+    <input [(ngModel)]="selectedEmployee.department" name="department">
+    <!-- Add fields for other employee details -->
+    <button type="submit">Save</button>
+    <button type="button" (click)="cancelEdit()">Cancel</button>
+  </form>
 </div>
 
+<div>
+  <!-- List of employees with edit and delete buttons -->
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Department</th>
+        <!-- Add headers for other employee details -->
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.department }}</td>
+        <!-- Display other employee details -->
+        <td>
+          <button (click)="onSelect(employee)">Edit</button>
+          <button (click)="deleteEmployee(employee.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-
-public class Employee {
-
-    private String id;
-    private String name;
-    private String department;
-
-    // Getter methods
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    // Setter methods
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-}
