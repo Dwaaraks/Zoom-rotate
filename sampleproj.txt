@@ -263,3 +263,57 @@ export class EmployeeComponent implements OnInit {
   </table>
 </div>
 
+
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/employees")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @GetMapping
+    public ResponseEntity<List<Employee>> getEmployees(@RequestHeader("Authorization") String authToken,
+                                                       @RequestHeader("Custom-Header") String customHeader) {
+        // Here you can handle the authorization token and custom headers if needed
+        List<Employee> employees = employeeService.getAllEmployees();
+        return new ResponseEntity<>(employees, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee,
+                                                   @RequestHeader("Authorization") String authToken,
+                                                   @RequestHeader("Custom-Header") String customHeader) {
+        // Here you can handle the authorization token and custom headers if needed
+        Employee createdEmployee = employeeService.createEmployee(employee);
+        return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable("id") String id,
+                                                   @RequestBody Employee employee,
+                                                   @RequestHeader("Authorization") String authToken,
+                                                   @RequestHeader("Custom-Header") String customHeader) {
+        // Here you can handle the authorization token and custom headers if needed
+        Employee updatedEmployee = employeeService.updateEmployee(id, employee);
+        return new ResponseEntity<>(updatedEmployee, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable("id") String id,
+                                                @RequestHeader("Authorization") String authToken,
+                                                @RequestHeader("Custom-Header") String customHeader) {
+        // Here you can handle the authorization token and custom headers if needed
+        employeeService.deleteEmployee(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Other controller methods...
+}
