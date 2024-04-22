@@ -437,3 +437,35 @@ html updated
     </tbody>
   </table>
 </div>
+
+
+
+<!-- Form for adding new employee -->
+<form *ngIf="isNewEmployee" (ngSubmit)="saveEmployee()">
+  <table>
+    <tr>
+      <td><label>Kid:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+      <td><label>Name:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+    </tr>
+    <tr>
+      <td><label>Address:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.address" name="address"></td>
+      <td><label>Employee ID:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+    </tr>
+    <tr>
+      <td><label>Phone Number:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.phno" name="phno"></td>
+      <td><label>Date of Joining:</label></td>
+      <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+    </tr>
+    <tr>
+      <td><label>LOB:</label></td>
+      <td><input [(ngModel)]="selectedEmployee.lob" name="lob"></td>
+      <td></td>
+      <td><button type="submit">Submit</button></td>
+    </tr>
+  </table>
+</form>
