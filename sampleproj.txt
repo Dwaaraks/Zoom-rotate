@@ -317,3 +317,123 @@ public class EmployeeController {
 
     // Other controller methods...
 }
+
+
+
+
+css
+/* employee.component.css - CSS for employee component */
+
+.employee-form {
+  width: 50%;
+  margin: auto;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+}
+
+input[type="text"], input[type="date"] {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+button[type="button"] {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+}
+
+button[type="button"]:hover {
+  background-color: #c82333;
+}
+
+
+
+html updated
+
+<!-- employee.component.html - Template for managing employee data in Angular -->
+<div>
+  <!-- Form for adding new employee -->
+  <form *ngIf="isNewEmployee" (ngSubmit)="saveEmployee()">
+    <table>
+      <tr>
+        <td><label>Kid:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+        <td><label>Name:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+      </tr>
+      <tr>
+        <td><label>Address:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.address" name="address"></td>
+        <td><label>Employee ID:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+      </tr>
+      <tr>
+        <td><label>Phone Number:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.phno" name="phno"></td>
+        <td><label>Date of Joining:</label></td>
+        <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+      </tr>
+      <tr>
+        <td><label>LOB:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.lob" name="lob"></td>
+        <td></td>
+        <td><button type="submit">Submit</button></td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- List of employees with edit and delete buttons -->
+  <table>
+    <thead>
+      <tr>
+        <th>Kid</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Employee ID</th>
+        <th>Phone Number</th>
+        <th>Date of Joining</th>
+        <th>LOB</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td>{{ employee.kid }}</td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.address }}</td>
+        <td>{{ employee.employeeId }}</td>
+        <td>{{ employee.phno }}</td>
+        <td>{{ employee.dateOfJoining }}</td>
+        <td>{{ employee.lob }}</td>
+        <td>
+          <button (click)="onSelect(employee)">Edit</button>
+          <button (click)="deleteEmployee(employee.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
