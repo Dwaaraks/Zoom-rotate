@@ -512,3 +512,27 @@ html updated
   <!-- Include the table to display the list of employees -->
 </div>
 
+
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+import { EmployeeComponent } from './employee.component';
+import { EmployeeService } from './employee.service';
+
+@NgModule({
+  declarations: [
+    EmployeeComponent
+  ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HttpClientModule
+  ],
+  providers: [
+    EmployeeService
+  ]
+})
+export class EmployeeModule { }
+
