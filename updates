@@ -1,0 +1,388 @@
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
+
+@Document(collection = "employees")
+public class Employee {
+
+    @Id
+    private String id;
+    private String name;
+    private String address;
+    private String employeeId;
+    private String phoneNumber;
+    private LocalDate dateOfJoining;
+    private LOB lob;
+
+    public enum LOB {
+        FINANCE, HUMAN_RESOURCES, IT, MARKETING, SALES
+    }
+
+    // Getters and setters
+
+    // Constructor, toString, etc.
+}
+
+
+Controller
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/employees")
+@CrossOrigin(origins = "http://localhost:4200")
+public class EmployeeController {
+
+    @GetMapping("/lob-options")
+    public List<Employee.LOB> getLobOptions() {
+        return Arrays.asList(Employee.LOB.values());
+    }
+
+    // Other existing endpoints
+}
+
+service.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Employee } from './employee.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
+
+  private apiUrl = '/api/employees';
+
+  constructor(private http: HttpClient) { }
+
+  getEmployees(): Observable<Employee[]> {
+    return this.http.get<Employee[]>(this.apiUrl);
+  }
+
+  getEmployeeById(id: string): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`);
+  }
+
+  createEmployee(employee: Employee): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, employee);
+  }
+
+  updateEmployee(id: string, employee: Employee): Observable<Employee> {
+    return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee);
+  }
+
+  deleteEmployee(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getLobOptions(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/lob-options`);
+  }
+}
+
+component.ts
+import { Component, OnInit } from '@angular/core';
+import { Employee } from './employee.model';
+import { EmployeeService } from './employee.service';
+
+@Component({
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css']
+})
+export class EmployeeComponent implements OnInit {
+
+  employees: Employee[] = [];
+  selectedEmployee: Employee = new Employee();
+  isNewEmployee: boolean = true;
+  lobOptions: string[] = [];
+
+  constructor(private employeeService: EmployeeService) { }
+
+  ngOnInit(): void {
+    this.getEmployees();
+    this.getLobOptions();
+  }
+
+  getEmployees(): void {
+    this.employeeService.getEmployees()
+      .subscribe(employees => this.employees = employees);
+  }
+
+  getLobOptions(): void {
+    this.employeeService.getLobOptions()
+      .subscribe(options => this.lobOptions = options);
+  }
+
+  onSelect(employee: Employee): void {
+    this.selectedEmployee = { ...employee };
+    this.isNewEmployee = false;
+  }
+
+  saveEmployee(): void {
+    if (this.isNewEmployee) {
+      this.employeeService.createEmployee(this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+        });
+    } else {
+      this.employeeService.updateEmployee(this.selectedEmployee.id, this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+          this.isNewEmployee = true;
+        });
+    }
+  }
+
+  deleteEmployee(id: string): void {
+    this.employeeService.deleteEmployee(id)
+      .subscribe(() => {
+        this.getEmployees();
+        this.selectedEmployee = new Employee();
+        this.isNewEmployee = true;
+      });
+  }
+
+  cancelEdit(): void {
+    this.selectedEmployee = new Employee();
+    this.isNewEmployee = true;
+  }
+}
+
+
+html
+
+
+<div>
+  <!-- Form for adding new employee -->
+  <form *ngIf="isNewEmployee" (ngSubmit)="saveEmployee()">
+    <h2>Add New Employee</h2>
+    <table>
+      <tr>
+        <td><label>Kid:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+        <td><label>Name:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+      </tr>
+      <tr>
+        <td><label>Address:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.address" name="address"></td>
+        <td><label>Employee ID:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+      </tr>
+      <tr>
+        <td><label>Phone Number:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.phoneNumber" name="phoneNumber"></td>
+        <td><label>Date of Joining:</label></td>
+        <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+      </tr>
+      <tr>
+        <td><label>LOB:</label></td>
+        <td>
+          <select [(ngModel)]="selectedEmployee.lob" name="lob">
+            <option *ngFor="let option of lobOptions" [value]="option">{{ option }}</option>
+          </select>
+        </td>
+        <td></td>
+        <td><button type="submit">Submit</button></td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- Form for editing existing employee -->
+  <form *ngIf="!isNewEmployee" (ngSubmit)="saveEmployee()">
+    <h2>Edit Employee</h2>
+    <table>
+      <tr>
+        <td><label>Kid:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+        <td><label>Name:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+      </tr>
+      <tr>
+        <td><label>Address:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.address" name="address"></td>
+        <td><label>Employee ID:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+      </tr>
+      <tr>
+        <td><label>Phone Number:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.phoneNumber" name="phoneNumber"></td>
+        <td><label>Date of Joining:</label></td>
+        <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+      </tr>
+      <tr>
+        <td><label>LOB:</label></td>
+        <td>
+          <select [(ngModel)]="selectedEmployee.lob" name="lob">
+            <option *ngFor="let option of lobOptions" [value]="option">{{ option }}</option>
+          </select>
+        </td>
+        <td></td>
+        <td><button type="submit">Save</button></td>
+      </tr>
+    </table>
+    <button type="button" (click)="cancelEdit()">Cancel</button>
+  </form>
+</div>
+
+<div>
+  <!-- List of employees with edit and delete buttons -->
+  <h2>Employee List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Kid</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Employee ID</th>
+        <th>Phone Number</th>
+        <th>Date of Joining</th>
+        <th>LOB</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td>{{ employee.kid }}</td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.address }}</td>
+        <td>{{ employee.employeeId }}</td>
+        <td>{{ employee.phoneNumber }}</td>
+        <td>{{ employee.dateOfJoining | date: 'yyyy-MM-dd' }}</td>
+        <td>{{ employee.lob }}</td>
+        <td>
+          <button (click)="onSelect(employee)">Edit</button>
+          <button (click)="deleteEmployee(employee.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+delete multi
+
+<div>
+  <h2>Employee List</h2>
+  <button (click)="deleteSelectedEmployees()">Delete Selected</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Employee ID</th>
+        <th>Phone Number</th>
+        <th>Date of Joining</th>
+        <th>LOB</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td><input type="checkbox" [(ngModel)]="employee.selected"></td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.address }}</td>
+        <td>{{ employee.employeeId }}</td>
+        <td>{{ employee.phoneNumber }}</td>
+        <td>{{ employee.dateOfJoining | date:'yyyy-MM-dd' }}</td>
+        <td>{{ employee.lob }}</td>
+        <td>
+          <button (click)="onSelect(employee)">Edit</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { Employee } from './employee.model';
+import { EmployeeService } from './employee.service';
+
+@Component({
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css']
+})
+export class EmployeeComponent implements OnInit {
+
+  employees: Employee[] = [];
+  selectedEmployee: Employee = new Employee();
+  isNewEmployee: boolean = true;
+  lobOptions: string[] = ['Option1', 'Option2', 'Option3']; // Add more LOB options here
+
+  constructor(private employeeService: EmployeeService) { }
+
+  ngOnInit(): void {
+    this.getEmployees();
+  }
+
+  getEmployees(): void {
+    this.employeeService.getEmployees()
+      .subscribe(employees => this.employees = employees);
+  }
+
+  onSelect(employee: Employee): void {
+    this.selectedEmployee = { ...employee };
+    this.isNewEmployee = false;
+  }
+
+  saveEmployee(): void {
+    if (this.isNewEmployee) {
+      this.employeeService.createEmployee(this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+        });
+    } else {
+      this.employeeService.updateEmployee(this.selectedEmployee.id, this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+          this.isNewEmployee = true;
+        });
+    }
+  }
+
+  deleteSelectedEmployees(): void {
+    const selectedEmployeeIds = this.employees
+      .filter(employee => employee.selected)
+      .map(employee => employee.id);
+
+    selectedEmployeeIds.forEach(id => {
+      this.employeeService.deleteEmployee(id).subscribe(() => {
+        this.getEmployees();
+        this.selectedEmployee = new Employee();
+        this.isNewEmployee = true;
+      });
+    });
+  }
+
+  cancelEdit(): void {
+    this.selectedEmployee = new Employee();
+    this.isNewEmployee = true;
+  }
+}
+
+module.ts
+export class Employee {
+  id: string;
+  name: string;
+  address: string;
+  employeeId: string;
+  phoneNumber: string;
+  dateOfJoining: string; // Keep it as string to handle date input as string
+  lob: string;
+  selected?: boolean; // Optional property for selection
+}
