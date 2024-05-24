@@ -386,3 +386,338 @@ export class Employee {
   lob: string;
   selected?: boolean; // Optional property for selection
 }
+
+
+for edit employee
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    // Method to update employee
+    public Employee updateEmployee(String id, Employee newEmployeeData) {
+        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+        if (optionalEmployee.isPresent()) {
+            Employee existingEmployee = optionalEmployee.get();
+            // Update the existing employee with new data
+            existingEmployee.setName(newEmployeeData.getName());
+            existingEmployee.setAddress(newEmployeeData.getAddress());
+            existingEmployee.setEmployeeId(newEmployeeData.getEmployeeId());
+            existingEmployee.setPhoneNumber(newEmployeeData.getPhoneNumber());
+            existingEmployee.setDateOfJoining(newEmployeeData.getDateOfJoining());
+            existingEmployee.setLob(newEmployeeData.getLob());
+            // Save the updated employee
+            return employeeRepository.save(existingEmployee);
+        } else {
+            // Handle the case where the employee with the given id is not found
+            // For example, throw an exception or return null
+            throw new RuntimeException("Employee not found with id: " + id);
+        }
+    }
+}
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/employees")
+@CrossOrigin(origins = "http://localhost:4200")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    // Other endpoints...
+
+    // Endpoint to update an employee
+    @PutMapping("/{id}")
+    public Employee updateEmployee(@PathVariable String id, @RequestBody Employee newEmployeeData) {
+        return employeeService.updateEmployee(id, newEmployeeData);
+    }
+}
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Employee } from './employee.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
+
+  private apiUrl = '/api/employees';
+
+  constructor(private http: HttpClient) { }
+
+  // Fetch all employees
+  getEmployees(): Observable<Employee[]> {
+    return this.http.get<Employee[]>(this.apiUrl);
+  }
+
+  // Fetch a single employee by ID
+  getEmployeeById(id: string): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`);
+  }
+
+  // Create a new employee
+  createEmployee(employee: Employee): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, employee);
+  }
+
+  // Update an existing employee
+  updateEmployee(id: string, employee: Employee): Observable<Employee> {
+    return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee);
+  }
+
+  // Delete an employee
+  deleteEmployee(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+}
+
+import { Component, OnInit } from '@angular/core';
+import { Employee } from './employee.model';
+import { EmployeeService } from './employee.service';
+
+@Component({
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css']
+})
+export class EmployeeComponent implements OnInit {
+
+  employees: Employee[] = [];
+  selectedEmployee: Employee = new Employee();
+  isNewEmployee: boolean = true;
+
+  constructor(private employeeService: EmployeeService) { }
+
+  ngOnInit(): void {
+    this.getEmployees();
+  }
+
+  getEmployees(): void {
+    this.employeeService.getEmployees()
+      .subscribe(employees => this.employees = employees);
+  }
+
+  onSelect(employee: Employee): void {
+    this.selectedEmployee = { ...employee };
+    this.isNewEmployee = false;
+  }
+
+  saveEmployee(): void {
+    if (this.isNewEmployee) {
+      this.employeeService.createEmployee(this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+        });
+    } else {
+      this.employeeService.updateEmployee(this.selectedEmployee.id, this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+          this.isNewEmployee = true;
+        });
+    }
+  }
+
+  deleteEmployee(id: string): void {
+    this.employeeService.deleteEmployee(id)
+      .subscribe(() => {
+        this.getEmployees();
+        this.selectedEmployee = new Employee();
+        this.isNewEmployee = true;
+      });
+  }
+
+  cancelEdit(): void {
+    this.selectedEmployee = new Employee();
+    this.isNewEmployee = true;
+  }
+}
+
+ADDRESS
+
+// employee.component.ts
+import { Component, OnInit } from '@angular/core';
+import { Employee } from './employee.model';
+import { EmployeeService } from './employee.service';
+import { AddressType } from './address.enum';
+
+@Component({
+  selector: 'app-employee',
+  templateUrl: './employee.component.html',
+  styleUrls: ['./employee.component.css']
+})
+export class EmployeeComponent implements OnInit {
+
+  employees: Employee[] = [];
+  selectedEmployee: Employee = new Employee();
+  isNewEmployee: boolean = true;
+  addressTypes = Object.values(AddressType);
+
+  constructor(private employeeService: EmployeeService) { }
+
+  ngOnInit(): void {
+    this.getEmployees();
+  }
+
+  getEmployees(): void {
+    this.employeeService.getEmployees()
+      .subscribe(employees => this.employees = employees);
+  }
+
+  onSelect(employee: Employee): void {
+    this.selectedEmployee = { ...employee };
+    this.isNewEmployee = false;
+  }
+
+  saveEmployee(): void {
+    if (this.isNewEmployee) {
+      this.employeeService.createEmployee(this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+        });
+    } else {
+      this.employeeService.updateEmployee(this.selectedEmployee.id, this.selectedEmployee)
+        .subscribe(() => {
+          this.getEmployees();
+          this.selectedEmployee = new Employee();
+          this.isNewEmployee = true;
+        });
+    }
+  }
+
+  deleteEmployee(id: string): void {
+    this.employeeService.deleteEmployee(id)
+      .subscribe(() => {
+        this.getEmployees();
+        this.selectedEmployee = new Employee();
+        this.isNewEmployee = true;
+      });
+  }
+
+  cancelEdit(): void {
+    this.selectedEmployee = new Employee();
+    this.isNewEmployee = true;
+  }
+}
+
+<!-- employee.component.html - Template for managing employee data in Angular -->
+<div>
+  <!-- Form for adding new employee -->
+  <form *ngIf="isNewEmployee" (ngSubmit)="saveEmployee()">
+    <h2>Add New Employee</h2>
+    <table>
+      <tr>
+        <td><label>Kid:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+        <td><label>Name:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+      </tr>
+      <tr>
+        <td><label>Address:</label></td>
+        <td>
+          <div *ngFor="let addressType of addressTypes">
+            <input type="radio" [(ngModel)]="selectedEmployee.address" name="address" [value]="addressType">
+            <label>{{addressType}}</label>
+          </div>
+        </td>
+        <td><label>Employee ID:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+      </tr>
+      <tr>
+        <td><label>Phone Number:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.phno" name="phno"></td>
+        <td><label>Date of Joining:</label></td>
+        <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+      </tr>
+      <tr>
+        <td><label>LOB:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.lob" name="lob"></td>
+        <td></td>
+        <td><button type="submit">Submit</button></td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- Form for editing existing employee -->
+  <form *ngIf="!isNewEmployee" (ngSubmit)="saveEmployee()">
+    <h2>Edit Employee</h2>
+    <table>
+      <tr>
+        <td><label>Kid:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.kid" name="kid"></td>
+        <td><label>Name:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.name" name="name"></td>
+      </tr>
+      <tr>
+        <td><label>Address:</label></td>
+        <td>
+          <div *ngFor="let addressType of addressTypes">
+            <input type="radio" [(ngModel)]="selectedEmployee.address" name="address" [value]="addressType">
+            <label>{{addressType}}</label>
+          </div>
+        </td>
+        <td><label>Employee ID:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.employeeId" name="employeeId"></td>
+      </tr>
+      <tr>
+        <td><label>Phone Number:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.phno" name="phno"></td>
+        <td><label>Date of Joining:</label></td>
+        <td><input type="date" [(ngModel)]="selectedEmployee.dateOfJoining" name="dateOfJoining"></td>
+      </tr>
+      <tr>
+        <td><label>LOB:</label></td>
+        <td><input [(ngModel)]="selectedEmployee.lob" name="lob"></td>
+        <td></td>
+        <td><button type="submit">Save</button></td>
+      </tr>
+    </table>
+    <button type="button" (click)="cancelEdit()">Cancel</button>
+  </form>
+
+  <!-- List of employees with edit and delete buttons -->
+  <h2>Employee List</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Kid</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Employee ID</th>
+        <th>Phone Number</th>
+        <th>Date of Joining</th>
+        <th>LOB</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td>{{ employee.kid }}</td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.address }}</td>
+        <td>{{ employee.employeeId }}</td>
+        <td>{{ employee.phno }}</td>
+        <td>{{ employee.dateOfJoining | date: 'yyyy-MM-dd' }}</td>
+        <td>{{ employee.lob }}</td>
+        <td>
+          <button (click)="onSelect(employee)">Edit</button>
+          <button (click)="deleteEmployee(employee.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
